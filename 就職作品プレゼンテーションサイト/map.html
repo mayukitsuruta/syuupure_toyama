@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ぽちっととやま</title>
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png" />
+    <link rel="apple-touch-icon" href="images/favicon.png" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Firebase SDK -->
+    <script type="module">
+      // Firebase SDKをインポート
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+      import {
+        getDatabase,
+        ref,
+        push,
+        onChildAdded,
+        onChildRemoved,
+        onChildChanged,
+        remove,
+        update,
+        onValue,
+        get,
+        runTransaction,
+      } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+      import {
+        getAuth,
+        signInAnonymously,
+      } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+      import {
+        getStorage,
+        ref as storageRef,
+        uploadBytes,
+        getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+
+      // Firebase設定（ここにあなたのFirebase設定を入力してください）
+
+      // Firebase Console (https://console.firebase.google.com/) から取得できます
+      const firebaseConfig = {
+        apiKey: "AIzaSyCQF-STf75t_L4wGzqYGUj5BTEOA1-F6FU",
+        authDomain: "syuupure-23844.firebaseapp.com",
+        projectId: "syuupure-23844",
+        storageBucket: "syuupure-23844.firebasestorage.app",
+        messagingSenderId: "268810868487",
+        appId: "1:268810868487:web:144a14ceed96bfed1617a2",
+        measurementId: "G-RNSG4YB7E7",
+      };
+
+      // Firebaseを初期化
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const database = getDatabase(app);
+      const auth = getAuth(app);
+      const storage = getStorage(app);
+
+      // 匿名ログイン
+      signInAnonymously(auth)
+        .then(() => {
+          console.log("匿名ログイン成功、UID:", auth.currentUser.uid);
+          window.currentUID = auth.currentUser.uid;
+          window.dispatchEvent(new Event("firebaseAuthReady"));
+        })
+        .catch((error) => {
+          console.error("匿名ログイン失敗:", error);
+        });
+
+      // Firebaseインスタンスをグローバルに公開
+      window.firebaseApp = app;
+      window.firebaseDatabase = database;
+      window.firebaseAuth = auth;
+      window.firebaseStorage = storage;
+      window.firebaseRef = ref;
+      window.firebasePush = push;
+      window.firebaseOnChildAdded = onChildAdded;
+      window.firebaseOnChildRemoved = onChildRemoved;
+      window.firebaseOnChildChanged = onChildChanged;
+      window.firebaseRemove = remove;
+      window.firebaseUpdate = update;
+      window.firebaseOnValue = onValue;
+      window.firebaseGet = get;
+      window.firebaseRunTransaction = runTransaction;
+      window.firebaseStorageRef = storageRef;
+      window.firebaseUploadBytes = uploadBytes;
+      window.firebaseGetDownloadURL = getDownloadURL;
+    </script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      #map {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        filter: grayscale(100%) brightness(1.1);
+      }
+
+      /* 地域マーカーのスタイル */
+      .region-marker {
+        position: absolute;
+        cursor: pointer;
+        z-index: 200;
+        pointer-events: auto;
+        user-select: none;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .region-marker .region-label {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        white-space: nowrap;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .region-marker:hover .region-label {
+        background: rgba(255, 255, 255, 1);
+        transform: scale(1.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      }
+
+      .region-marker.active .region-label {
+        background: linear-gradient(
+          135deg,
+          #b8e6ff 0%,
+          #a8d8ea 30%,
+          #ffb6c1 60%,
+          #ffc0cb 100%
+        );
+        color: white;
+        transform: scale(1.15);
+        box-shadow: 0 6px 25px rgba(184, 230, 255, 0.5);
+      }
+
+      /* 地域詳細パネル */
+      #regionDetailPanel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 245, 245, 0.98) 0%,
+          rgba(240, 248, 255, 0.98) 100%
+        );
+        backdrop-filter: blur(20px);
+        padding: 40px;
+        max-height: 50vh;
+        overflow-y: auto;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1000;
+        box-shadow: 0 -4px 30px rgba(184, 230, 255, 0.3);
+      }
+
+      #regionDetailPanel.show {
+        transform: translateY(0);
+      }
+
+      #regionDetailPanel h2 {
+        margin: 0 0 20px 0;
+        font-size: 32px;
+        font-weight: 700;
+        color: #333;
+      }
+
+      #regionDetailPanel .region-description {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #666;
+        margin-bottom: 30px;
+      }
+
+      /* MOREボタン */
+      .region-attractions {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 20px;
+      }
+
+      .more-link-btn {
+        display: inline-block;
+        padding: 14px 40px;
+        background: linear-gradient(
+          135deg,
+          #b8e6ff 0%,
+          #a8d8ea 30%,
+          #ffb6c1 60%,
+          #ffc0cb 100%
+        );
+        color: white;
+        text-decoration: none;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 4px 15px rgba(184, 230, 255, 0.4);
+        white-space: nowrap;
+      }
+
+      .more-link-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(255, 182, 193, 0.5);
+        background: linear-gradient(
+          135deg,
+          #c8f0ff 0%,
+          #b8e6ff 30%,
+          #ffc0cb 60%,
+          #ffd1dc 100%
+        );
+      }
+
+      .more-link-btn:active {
+        transform: translateY(-1px) scale(1.02);
+      }
+
+      #regionDetailPanel .close-region-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 24px;
+        color: #666;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #regionDetailPanel .close-region-btn:hover {
+        background: rgba(0, 0, 0, 0.1);
+        transform: rotate(90deg);
+      }
+
+      /* 地図のコントロールを日本語対応 */
+      .mapboxgl-ctrl-attrib {
+        font-size: 10px;
+      }
+
+      /* キャラクター画像 */
+      .chara-image {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 300;
+        pointer-events: none;
+        max-width: 300px;
+        max-height: 300px;
+        width: auto;
+        height: auto;
+        transition: transform 0.3s ease;
+      }
+
+      .chara-image:hover {
+        transform: scale(1.05);
+      }
+
+      @media (max-width: 768px) {
+        .chara-image {
+          bottom: 15px;
+          right: 15px;
+          max-width: 180px;
+          max-height: 180px;
+        }
+      }
+
+      /* Mapboxのデフォルトマーカーを非表示 */
+      .mapboxgl-marker {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #pinsContainer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      /* ピンSVG要素のスタイル */
+      .pin-svg {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        transform-origin: bottom center;
+        z-index: 100;
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+
+      .pin-svg img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        object-fit: cover;
+        pointer-events: none;
+      }
+
+      .pin-edit-icon {
+        width: 100%;
+        height: 100%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        background: linear-gradient(
+          135deg,
+          #b8e6ff 0%,
+          #a8d8ea 30%,
+          #ffb6c1 60%,
+          #ffc0cb 100%
+        );
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 15px rgba(184, 230, 255, 0.5);
+        pointer-events: none;
+      }
+
+      .pin-svg.editing {
+        transform: scale(1.3);
+        z-index: 200;
+      }
+
+      .pin-svg:hover {
+        transform: scale(1.2);
+      }
+
+      .pin-svg.editing:hover {
+        transform: scale(1.3);
+      }
+
+      /* ピンポップアップ */
+      #pinPopup {
+        position: absolute;
+        background: #efefef;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        z-index: 500;
+        pointer-events: auto;
+        font-size: 15px;
+        font-weight: 500;
+        color: #515157;
+        opacity: 0;
+        transform: translateX(-50%) translateY(calc(-100% + 20px)) scale(0.8);
+        transition: opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+          transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        padding: 12px 16px;
+        width: 240px;
+      }
+
+      #pinPopup.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(calc(-100% + 20px)) scale(1);
+      }
+
+      /* タブスイッチ */
+      .tab-switch {
+        position: fixed;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: flex;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        padding: 5px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        gap: 5px;
+      }
+
+      .tab-switch button {
+        padding: 12px 30px;
+        border: none;
+        background: transparent;
+        color: #666;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+      }
+
+      .tab-switch .slider {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: calc(50% - 5px);
+        height: calc(100% - 10px);
+        background: linear-gradient(
+          135deg,
+          #b8e6ff 0%,
+          #a8d8ea 30%,
+          #ffb6c1 60%,
+          #ffc0cb 100%
+        );
+        border-radius: 25px;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1;
+      }
+
+      .tab-switch button.active {
+        color: white;
+      }
+
+      .tab-switch.gallery-active .slider {
+        transform: translateX(100%);
+      }
+
+      /* レスポンシブ対応 */
+      @media (max-width: 768px) {
+        .tab-switch {
+          top: 20px;
+          padding: 4px;
+        }
+
+        .tab-switch button {
+          padding: 10px 20px;
+          font-size: 12px;
+        }
+
+        .tab-switch .slider {
+          top: 4px;
+          left: 4px;
+          width: calc(50% - 4px);
+          height: calc(100% - 8px);
+        }
+
+        #regionDetailPanel {
+          padding: 30px 20px;
+          max-height: 60vh;
+        }
+
+        #regionDetailPanel h2 {
+          font-size: 24px;
+          margin-bottom: 15px;
+        }
+
+        #regionDetailPanel .region-description {
+          font-size: 14px;
+          margin-bottom: 20px;
+        }
+
+        .more-link-btn {
+          padding: 12px 30px;
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- タブスイッチ -->
+    <div class="tab-switch" id="tabSwitch">
+      <div class="slider"></div>
+      <button class="active" onclick="window.location.href='map.html'">
+        とやまっぷ
+      </button>
+      <button onclick="window.location.href='gallery.html'">
+        フォトギャラリー
+      </button>
+    </div>
+
+    <!-- ハンバーガーメニュー -->
+    <div class="hamburger-menu" id="hamburgerMenu">
+      <div class="hamburger-icon" id="hamburgerIcon">
+        <span class="open-text">開く</span>
+        <span class="close-text">閉じる</span>
+      </div>
+      <nav class="menu-overlay" id="menuOverlay">
+        <ul class="menu-list">
+          <li><a href="index.html">トップ</a></li>
+          <li><a href="map.html">とやまっぷ</a></li>
+          <li><a href="gallery.html">フォトギャラリー</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Mapbox地図 -->
+    <div id="map"></div>
+    <div id="pinsContainer"></div>
+
+    <!-- 詳細パネル -->
+    <div id="detailPanel" class="detail-panel">
+      <button class="close-button" id="closeButton">×</button>
+      <div class="detail-content">
+        <h2 id="detailTitle"></h2>
+        <img id="detailImage" src="" alt="" />
+        <p id="detailDescription"></p>
+      </div>
+    </div>
+
+    <!-- ピンポップアップ -->
+    <div id="pinPopup"></div>
+
+    <!-- 地域詳細パネル -->
+    <div id="regionDetailPanel">
+      <button class="close-region-btn" id="closeRegionBtn">×</button>
+      <h2 id="regionTitle"></h2>
+      <div class="region-description" id="regionDescription"></div>
+      <div class="region-attractions" id="regionAttractions"></div>
+    </div>
+
+    <!-- キャラクター画像 -->
+    <img
+      src="images/chara.png"
+      alt="キャラクター"
+      class="chara-image"
+      onerror="this.style.display='none'"
+    />
+
+    <script src="map.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
