@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ぽちっととやま</title>
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png" />
+    <link rel="apple-touch-icon" href="images/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .region-detail-container {
+        width: 100%;
+        min-height: 100vh;
+        padding: 120px 50px 50px;
+        background: linear-gradient(135deg, #fff5f5 0%, #f0f8ff 100%);
+      }
+
+      .region-detail-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 60px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .region-header {
+        text-align: center;
+        margin-bottom: 50px;
+        padding-bottom: 30px;
+        border-bottom: 3px solid #e0e0e0;
+      }
+
+      .region-header h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          #b8e6ff 0%,
+          #a8d8ea 30%,
+          #ffb6c1 60%,
+          #ffc0cb 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+        letter-spacing: 0.1em;
+      }
+
+      .region-header p {
+        font-size: 1.2rem;
+        color: #666;
+        line-height: 1.8;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .attractions-section {
+        margin-top: 40px;
+      }
+
+      .attractions-section h2 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .attractions-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin-top: 30px;
+      }
+
+      .attraction-card {
+        background: white;
+        border-radius: 15px;
+        padding: 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        overflow: hidden;
+      }
+
+      .attraction-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(184, 230, 255, 0.4);
+        border-color: #ffb6c1;
+      }
+
+      .attraction-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+      }
+
+      .attraction-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* お気に入りマーク */
+      .attraction-favorite-star {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      .attraction-favorite-star:hover {
+        transform: scale(1.2);
+      }
+
+      .attraction-favorite-star.active {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+      }
+
+      .attraction-content {
+        padding: 25px;
+      }
+
+      .attraction-card h3 {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .attraction-card p {
+        color: #666;
+        line-height: 1.8;
+        font-size: 1rem;
+        margin-bottom: 20px;
+      }
+
+      .map-container-wrapper {
+        margin-top: 15px;
+      }
+
+      .attraction-map {
+        width: 100%;
+        height: 200px;
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 10px;
+      }
+
+      .map-link {
+        display: inline-block;
+        color: #ffb6c1;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .map-link:hover {
+        color: #a8d8ea;
+        text-decoration: underline;
+      }
+
+      .back-button {
+        display: inline-block;
+        margin-bottom: 30px;
+        padding: 12px 30px;
+        background: linear-gradient(
+          135deg,
+          #b8e6ff 0%,
+          #a8d8ea 30%,
+          #ffb6c1 60%,
+          #ffc0cb 100%
+        );
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+      }
+
+      .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+        font-size: 1.2rem;
+      }
+
+      /* 単一観光地の詳細表示 */
+      .attraction-detail-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-top: 40px;
+      }
+
+      .attraction-detail-image {
+        width: 100%;
+        position: relative;
+      }
+
+      .attraction-detail-image img {
+        width: 100%;
+        height: auto;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        object-fit: cover;
+      }
+
+      /* 詳細ページのお気に入りマーク */
+      .detail-favorite-star {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 2.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      .detail-favorite-star:hover {
+        transform: scale(1.2);
+      }
+
+      .detail-favorite-star.active {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+      }
+
+      .attraction-detail-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .attraction-detail-content h2 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .attraction-detail-content p {
+        font-size: 1.1rem;
+        color: #666;
+        line-height: 1.8;
+      }
+
+      .attraction-detail-content .map-container-wrapper {
+        margin-top: 20px;
+      }
+
+      .attraction-detail-content .attraction-map {
+        height: 300px;
+      }
+
+      @media (max-width: 1024px) {
+        .attraction-detail-section {
+          grid-template-columns: 1fr;
+          gap: 30px;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .attractions-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .region-detail-container {
+          padding: 100px 20px 30px;
+        }
+
+        .region-detail-content {
+          padding: 40px 20px;
+        }
+
+        .region-header h1 {
+          font-size: 2.5rem;
+        }
+
+        .region-header p {
+          font-size: 1rem;
+        }
+
+        .attractions-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .attractions-section h2 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ハンバーガーメニュー -->
+    <div class="hamburger-menu" id="hamburgerMenu">
+      <div class="hamburger-icon" id="hamburgerIcon">
+        <span class="open-text">開く</span>
+        <span class="close-text">閉じる</span>
+      </div>
+      <nav class="menu-overlay" id="menuOverlay">
+        <ul class="menu-list">
+          <li><a href="index.html">トップ</a></li>
+          <li><a href="map.html">とやまっぷ</a></li>
+          <li><a href="gallery.html">フォトギャラリー</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- 地域詳細コンテナ -->
+    <div class="region-detail-container">
+      <div class="region-detail-content">
+        <a href="#" id="backButton" class="back-button">← マップに戻る</a>
+        <div id="regionContent">
+          <div class="no-data">読み込み中...</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="map.js"></script>
+    <script>
+      // URLパラメータから地域名と観光地名を取得
+      const urlParams = new URLSearchParams(window.location.search);
+      const regionName = urlParams.get("region");
+      const attractionName = urlParams.get("attraction");
+
+      // マップ埋め込みHTMLを生成する関数
+      function generateMapEmbed(attraction) {
+        let mapEmbed = "";
+
+        if (attraction.mapEmbedUrl) {
+          let mapLinkUrl = "";
+
+          if (attraction.mapLinkUrl) {
+            mapLinkUrl = attraction.mapLinkUrl;
+          } else if (attraction.mapLat && attraction.mapLng) {
+            mapLinkUrl = `https://www.google.com/maps?q=${attraction.mapLat},${attraction.mapLng}&hl=ja`;
+          } else {
+            mapLinkUrl = attraction.mapEmbedUrl
+              .replace("/embed?", "?")
+              .replace("&output=embed", "");
+          }
+
+          mapEmbed = `
+            <div class="map-container-wrapper">
+              <iframe 
+                class="attraction-map" 
+                src="${attraction.mapEmbedUrl}" 
+                allowfullscreen 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+              <a href="${mapLinkUrl}" target="_blank" class="map-link">Googleマップで開く</a>
+            </div>
+          `;
+        } else if (attraction.mapLat && attraction.mapLng) {
+          const mapUrl = `https://www.google.com/maps?q=${attraction.mapLat},${attraction.mapLng}&hl=ja&z=15&output=embed`;
+          mapEmbed = `
+            <div class="map-container-wrapper">
+              <iframe 
+                class="attraction-map" 
+                src="${mapUrl}" 
+                allowfullscreen 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+              <a href="https://www.google.com/maps?q=${attraction.mapLat},${attraction.mapLng}&hl=ja" target="_blank" class="map-link">Googleマップで開く</a>
+            </div>
+          `;
+        }
+
+        return mapEmbed;
+      }
+
+      // 地域データを読み込んで表示
+      function loadRegionDetail() {
+        // map.jsが読み込まれるまで待つ
+        if (typeof window.toyamaRegions === "undefined") {
+          setTimeout(loadRegionDetail, 100);
+          return;
+        }
+
+        const regionContent = document.getElementById("regionContent");
+
+        if (!regionName) {
+          regionContent.innerHTML =
+            '<div class="no-data">地域が指定されていません。</div>';
+          return;
+        }
+
+        // 該当地域を検索
+        const region = window.toyamaRegions.find((r) => r.name === regionName);
+
+        if (!region) {
+          regionContent.innerHTML =
+            '<div class="no-data">地域情報が見つかりませんでした。</div>';
+          return;
+        }
+
+        // 観光地名が指定されている場合、その観光地の詳細のみを表示
+        if (attractionName) {
+          const attraction = region.attractions?.find(
+            (a) => a.name === attractionName
+          );
+
+          if (!attraction) {
+            regionContent.innerHTML =
+              '<div class="no-data">観光地情報が見つかりませんでした。</div>';
+            return;
+          }
+
+          const imageSrc = attraction.image || "images/mainvisual01.png";
+          const mapEmbed = generateMapEmbed(attraction);
+          const isFavorite =
+            window.favoriteUtils &&
+            window.favoriteUtils.isFavorite(attraction.name);
+          const favoriteClass = isFavorite ? "active" : "";
+
+          // 単一観光地の詳細表示
+          let html = `
+            <div class="region-header">
+              <h1>${attraction.name}</h1>
+              <p style="font-size: 1rem; color: #888;">${region.name}</p>
+            </div>
+            <div class="attraction-detail-section">
+              <div class="attraction-detail-image">
+                <img src="${imageSrc}" alt="${
+            attraction.name
+          }" onerror="this.src='images/mainvisual01.png'">
+                <span class="detail-favorite-star ${favoriteClass}" data-attraction-name="${
+            attraction.name
+          }">★</span>
+              </div>
+              <div class="attraction-detail-content">
+                <h2>詳細情報</h2>
+                <p>${
+                  attraction.description ||
+                  `${attraction.name}は、${region.name}を代表する観光スポットです。ぜひお立ち寄りください。`
+                }</p>
+                ${mapEmbed}
+              </div>
+            </div>
+          `;
+
+          regionContent.innerHTML = html;
+
+          // お気に入りマークのクリックイベントを設定
+          const detailFavoriteStar = regionContent.querySelector(
+            ".detail-favorite-star"
+          );
+          if (detailFavoriteStar) {
+            detailFavoriteStar.addEventListener("click", function (e) {
+              e.stopPropagation();
+              const attractionName = this.dataset.attractionName;
+              if (window.favoriteUtils) {
+                if (window.favoriteUtils.isFavorite(attractionName)) {
+                  window.favoriteUtils.removeFavorite(attractionName);
+                  this.classList.remove("active");
+                } else {
+                  window.favoriteUtils.addFavorite(attractionName);
+                  this.classList.add("active");
+                }
+              }
+            });
+          }
+
+          return;
+        }
+
+        // 地域情報を表示（すべての観光地を表示）
+        let html = `
+          <div class="region-header">
+            <h1>${region.name}</h1>
+            <p>${region.description}</p>
+          </div>
+        `;
+
+        // 観光地情報を表示
+        if (region.attractions && region.attractions.length > 0) {
+          html += `
+            <div class="attractions-section">
+              <h2>主な観光地</h2>
+              <div class="attractions-grid">
+          `;
+
+          region.attractions.forEach((attraction) => {
+            const imageSrc = attraction.image || "images/mainvisual01.png";
+            const mapEmbed = generateMapEmbed(attraction);
+            const isFavorite =
+              window.favoriteUtils &&
+              window.favoriteUtils.isFavorite(attraction.name);
+            const favoriteClass = isFavorite ? "active" : "";
+
+            html += `
+              <div class="attraction-card">
+                <div class="attraction-image-wrapper">
+                  <img src="${imageSrc}" alt="${
+              attraction.name
+            }" class="attraction-image" onerror="this.src='images/mainvisual01.png'">
+                  <span class="attraction-favorite-star ${favoriteClass}" data-attraction-name="${
+              attraction.name
+            }">★</span>
+                </div>
+                <div class="attraction-content">
+                  <h3>${attraction.name}</h3>
+                  <p>${
+                    attraction.description ||
+                    `${attraction.name}は、${region.name}を代表する観光スポットです。ぜひお立ち寄りください。`
+                  }</p>
+                  ${mapEmbed}
+                </div>
+              </div>
+            `;
+          });
+
+          html += `
+              </div>
+            </div>
+          `;
+        } else {
+          html += '<div class="no-data">観光地情報がありません。</div>';
+        }
+
+        regionContent.innerHTML = html;
+
+        // お気に入りマークのクリックイベントを設定
+        const favoriteStars = regionContent.querySelectorAll(
+          ".attraction-favorite-star"
+        );
+        favoriteStars.forEach((star) => {
+          star.addEventListener("click", function (e) {
+            e.stopPropagation();
+            const attractionName = this.dataset.attractionName;
+            if (window.favoriteUtils) {
+              if (window.favoriteUtils.isFavorite(attractionName)) {
+                window.favoriteUtils.removeFavorite(attractionName);
+                this.classList.remove("active");
+              } else {
+                window.favoriteUtils.addFavorite(attractionName);
+                this.classList.add("active");
+              }
+            }
+          });
+        });
+      }
+
+      // 戻るボタンの設定
+      function setupBackButton() {
+        const backButton = document.getElementById("backButton");
+        if (backButton) {
+          if (attractionName) {
+            // 観光地名が指定されている場合（ギャラリーから来た場合）
+            backButton.textContent = "← ギャラリーに戻る";
+            backButton.href = "gallery.html";
+          } else {
+            // 観光地名が指定されていない場合（マップから来た場合）
+            backButton.textContent = "← マップに戻る";
+            backButton.href = "map.html";
+          }
+        }
+      }
+
+      // ページ読み込み時に実行
+      document.addEventListener("DOMContentLoaded", function () {
+        setupBackButton();
+        loadRegionDetail();
+      });
+
+      // お気に入り変更時のイベントリスナー
+      window.addEventListener("favoritesChanged", function () {
+        loadRegionDetail();
+      });
+    </script>
+    <script src="main.js"></script>
+  </body>
+</html>

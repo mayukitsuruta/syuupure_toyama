@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ぽちっととやま</title>
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png" />
+    <link rel="apple-touch-icon" href="images/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* タブスイッチ */
+      .tab-switch {
+        position: fixed;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: flex;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        padding: 5px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        gap: 5px;
+      }
+
+      .tab-switch button {
+        padding: 12px 30px;
+        border: none;
+        background: transparent;
+        color: #666;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+      }
+
+      .tab-switch .slider {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: calc(50% - 5px);
+        height: calc(100% - 10px);
+        background: linear-gradient(
+          135deg,
+          #b8e6ff 0%,
+          #a8d8ea 30%,
+          #ffb6c1 60%,
+          #ffc0cb 100%
+        );
+        border-radius: 25px;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1;
+      }
+
+      .tab-switch.gallery-active .slider {
+        transform: translateX(100%);
+      }
+
+      .tab-switch button.active {
+        color: white;
+      }
+
+      @media (max-width: 768px) {
+        .tab-switch {
+          top: 20px;
+          padding: 4px;
+        }
+
+        .tab-switch button {
+          padding: 10px 20px;
+          font-size: 12px;
+        }
+
+        .tab-switch .slider {
+          top: 4px;
+          left: 4px;
+          width: calc(50% - 4px);
+          height: calc(100% - 8px);
+        }
+      }
+
+      /* ギャラリー画像のオーバーレイ */
+      .gallery-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .gallery-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0) 0%,
+          rgba(0, 0, 0, 0.7) 100%
+        );
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 20px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+      }
+
+      .gallery-item:hover .gallery-overlay {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .gallery-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        margin: 0;
+        letter-spacing: 0.05em;
+      }
+
+      .gallery-item {
+        cursor: pointer;
+      }
+
+      /* お気に入りマーク */
+      .favorite-star {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+        pointer-events: auto;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      .favorite-star:hover {
+        transform: scale(1.2);
+      }
+
+      .favorite-star.active {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+      }
+
+      @media (max-width: 768px) {
+        .gallery-title {
+          font-size: 1.2rem;
+        }
+
+        .favorite-star {
+          font-size: 1.5rem;
+          top: 10px;
+          right: 10px;
+        }
+      }
+
+      /* 星の画像 */
+      .hoshi-image {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 300;
+        pointer-events: none;
+        max-width: 400px;
+        max-height: 400px;
+        width: auto;
+        height: auto;
+        transition: transform 0.3s ease;
+      }
+
+      .hoshi-image:hover {
+        transform: scale(1.1);
+      }
+
+      @media (max-width: 768px) {
+        .hoshi-image {
+          bottom: 15px;
+          right: 15px;
+          max-width: 200px;
+          max-height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- タブスイッチ -->
+    <div class="tab-switch gallery-active" id="tabSwitch">
+      <div class="slider"></div>
+      <button onclick="window.location.href='map.html'">とやまっぷ</button>
+      <button class="active" onclick="window.location.href='gallery.html'">
+        フォトギャラリー
+      </button>
+    </div>
+
+    <!-- ハンバーガーメニュー -->
+    <div class="hamburger-menu" id="hamburgerMenu">
+      <div class="hamburger-icon" id="hamburgerIcon">
+        <span class="open-text">開く</span>
+        <span class="close-text">閉じる</span>
+      </div>
+      <nav class="menu-overlay" id="menuOverlay">
+        <ul class="menu-list">
+          <li><a href="index.html">トップ</a></li>
+          <li><a href="map.html">とやまっぷ</a></li>
+          <li><a href="gallery.html">フォトギャラリー</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- ギャラリーコンテナ -->
+    <div class="gallery-container">
+      <h1 class="page-title">フォトギャラリー</h1>
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- 観光地画像はJavaScriptで動的に生成 -->
+      </div>
+    </div>
+
+    <!-- 星の画像 -->
+    <img
+      src="images/hoshi.png"
+      alt="星"
+      class="hoshi-image"
+      onerror="this.style.display='none'"
+    />
+
+    <script src="map.js"></script>
+    <script>
+      // すべての観光地を収集
+      function getAllAttractions() {
+        const allAttractions = [];
+        if (window.toyamaRegions) {
+          window.toyamaRegions.forEach((region) => {
+            if (region.attractions && region.attractions.length > 0) {
+              region.attractions.forEach((attraction) => {
+                allAttractions.push({
+                  ...attraction,
+                  regionName: region.name,
+                });
+              });
+            }
+          });
+        }
+        return allAttractions;
+      }
+
+      // ギャラリーを生成
+      function renderGallery() {
+        const galleryGrid = document.getElementById("galleryGrid");
+        if (!galleryGrid) return;
+
+        const attractions = getAllAttractions();
+
+        // お気に入りでソート（お気に入りを上部に）
+        const favorites = window.favoriteUtils
+          ? window.favoriteUtils.getFavorites()
+          : [];
+        attractions.sort((a, b) => {
+          const aIsFavorite = favorites.includes(a.name);
+          const bIsFavorite = favorites.includes(b.name);
+          if (aIsFavorite && !bIsFavorite) return -1;
+          if (!aIsFavorite && bIsFavorite) return 1;
+          return 0;
+        });
+
+        galleryGrid.innerHTML = "";
+
+        attractions.forEach((attraction) => {
+          const galleryItem = document.createElement("div");
+          galleryItem.className = "gallery-item";
+          galleryItem.dataset.attractionName = attraction.name;
+
+          const imageWrapper = document.createElement("div");
+          imageWrapper.className = "gallery-image-wrapper";
+
+          const img = document.createElement("img");
+          img.src = attraction.image || "images/mainvisual01.png";
+          img.alt = attraction.name;
+          img.onerror = function () {
+            this.src = "images/mainvisual01.png";
+          };
+
+          // お気に入りマーク
+          const favoriteStar = document.createElement("span");
+          favoriteStar.className = "favorite-star";
+          favoriteStar.innerHTML = "★";
+          favoriteStar.dataset.attractionName = attraction.name;
+
+          // お気に入り状態を設定
+          if (
+            window.favoriteUtils &&
+            window.favoriteUtils.isFavorite(attraction.name)
+          ) {
+            favoriteStar.classList.add("active");
+          }
+
+          // お気に入りマークのクリックイベント
+          favoriteStar.addEventListener("click", function (e) {
+            e.stopPropagation();
+            if (window.favoriteUtils) {
+              if (window.favoriteUtils.isFavorite(attraction.name)) {
+                window.favoriteUtils.removeFavorite(attraction.name);
+                favoriteStar.classList.remove("active");
+              } else {
+                window.favoriteUtils.addFavorite(attraction.name);
+                favoriteStar.classList.add("active");
+              }
+              // ギャラリーを再描画してソート順を更新
+              renderGallery();
+            }
+          });
+
+          const overlay = document.createElement("div");
+          overlay.className = "gallery-overlay";
+
+          const title = document.createElement("h3");
+          title.className = "gallery-title";
+          title.textContent = attraction.name;
+
+          overlay.appendChild(title);
+          imageWrapper.appendChild(img);
+          imageWrapper.appendChild(favoriteStar);
+          imageWrapper.appendChild(overlay);
+          galleryItem.appendChild(imageWrapper);
+
+          // クリックイベント：詳細ページに遷移（お気に入りマーク以外をクリックした場合）
+          galleryItem.addEventListener("click", function (e) {
+            if (e.target !== favoriteStar && !favoriteStar.contains(e.target)) {
+              window.location.href = `region-detail.html?region=${encodeURIComponent(
+                attraction.regionName
+              )}&attraction=${encodeURIComponent(attraction.name)}`;
+            }
+          });
+
+          galleryGrid.appendChild(galleryItem);
+        });
+      }
+
+      // ページ読み込み時に実行
+      document.addEventListener("DOMContentLoaded", function () {
+        // map.jsが読み込まれるまで待つ
+        if (window.toyamaRegions) {
+          renderGallery();
+        } else {
+          // map.jsがまだ読み込まれていない場合、少し待つ
+          setTimeout(function () {
+            if (window.toyamaRegions) {
+              renderGallery();
+            } else {
+              console.error("観光地データが読み込まれていません");
+            }
+          }, 500);
+        }
+      });
+
+      // お気に入り変更時のイベントリスナー
+      window.addEventListener("favoritesChanged", function () {
+        renderGallery();
+      });
+    </script>
+    <script src="main.js"></script>
+  </body>
+</html>

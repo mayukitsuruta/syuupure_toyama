@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ぽちっととやま</title>
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png" />
+    <link rel="apple-touch-icon" href="images/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ハンバーガーメニュー -->
+    <div class="hamburger-menu" id="hamburgerMenu">
+      <div class="hamburger-icon" id="hamburgerIcon">
+        <span class="open-text">開く</span>
+        <span class="close-text">閉じる</span>
+      </div>
+      <nav class="menu-overlay" id="menuOverlay">
+        <ul class="menu-list">
+          <li><a href="index.html">トップ</a></li>
+          <li><a href="map.html">とやまっぷ</a></li>
+          <li><a href="gallery.html">フォトギャラリー</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- メインビジュアル -->
+    <div class="main-visual">
+      <video
+        id="mainVideo1"
+        class="main-video"
+        autoplay
+        muted
+        loop
+        playsinline
+      ></video>
+      <video id="mainVideo2" class="main-video" muted loop playsinline></video>
+      <div class="hero-content">
+        <h1 class="hero-title">ぽちっと<br />とやま</h1>
+        <a href="map.html" class="enter-button">はじめる →</a>
+      </div>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>

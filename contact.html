@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ぽちっととやま</title>
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png" />
+    <link rel="apple-touch-icon" href="images/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ハンバーガーメニュー -->
+    <div class="hamburger-menu" id="hamburgerMenu">
+      <div class="hamburger-icon" id="hamburgerIcon">
+        <span class="open-text">開く</span>
+        <span class="close-text">閉じる</span>
+      </div>
+      <nav class="menu-overlay" id="menuOverlay">
+        <ul class="menu-list">
+          <li><a href="index.html">トップ</a></li>
+          <li><a href="map.html">とやまっぷ</a></li>
+          <li><a href="gallery.html">フォトギャラリー</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- コンタクトコンテナ -->
+    <div class="contact-container">
+      <h1 class="page-title">お問い合わせ</h1>
+      <div class="contact-content">
+        <p>
+          ぽちっととやまに関するお問い合わせは、<br />以下のフォームよりお願いいたします。
+        </p>
+        <form class="contact-form">
+          <div class="form-group">
+            <label for="name">お名前</label>
+            <input type="text" id="name" name="name" required />
+          </div>
+          <div class="form-group">
+            <label for="email">メールアドレス</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="message">メッセージ</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+          </div>
+          <button type="submit" class="submit-button">送信</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
